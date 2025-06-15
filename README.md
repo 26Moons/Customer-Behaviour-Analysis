@@ -189,9 +189,12 @@ Solution - Used Azure To accomplish this task </br>
                                                                               **Send Email** - configure my smtp details here ( i used gmail through App password as gmail use 2 step                                                                                         verification)</br>
                                                                               
 **Snapshot Of Resources**</br>
-
+<a href="CustomerChurnedReportViaEmail/AllResources.png"></a>
+![Alt text](CustomerChurnedReportViaEmail/AllResources.png)
 **Snapshot Of Logic App**</br>
+![Alt text](CustomerChurnedReportViaEmail/LogicAppFlow.png)
 **Snapshot Of Email Sent**</br>
+![Alt text](CustomerChurnedReportViaEmail/dailychurnreport.png)
                                                                              
             
 
