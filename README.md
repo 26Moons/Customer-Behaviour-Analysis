@@ -88,8 +88,96 @@ Solution : Approach : find the cohort month (i.e first login month) for each cus
           	   cs.Cohort_Size
           ORDER BY c.Cohort_month
 
-Question 4 -            
+Question 4 -  Which customer segments, based on demographic features (like gender, age group, or region),and high revenue generators have higher churn rates?”\
+Solution : Approach : Determine a customer base , having customers who are more likely to be churned (eg. they must have minimum of 2 logins and last login > 30 days ago)\
+                      Find out how many days have passed in between every consecutive login dates , flag them as 1 or 0 \
+                      add their demographic details and expenditure details \
+                      Segment the final output \
+           SQL QUERY : - write a CTE to remove duplicate logins on same day ( so that we dont waste our time)\
+                       - write a CTE to further filter the customer base by including only those customers who should have atleast 2 logins on different days or last login > 30 days ago\
+                       - write to CTE to determine next logins using LEAD()\
+                       - mark churn gaps\
+                       - Join with purchase table (spend) + customer table (demographics)\
+                       - Segment the result using NTILE() \
 
+           
+           WITH Login_base AS (
+             SELECT DISTINCT Customer_id, Login_date 
+             FROM Logins
+           ),
+           eligible_customers AS (
+             SELECT Customer_id,
+                    COUNT(*) AS num_logins,
+                    MAX(Login_date) AS last_login
+             FROM Login_base
+             GROUP BY Customer_id
+             HAVING COUNT(*) >= 2
+                    OR (COUNT(*) = 1 AND DATEDIFF(DAY, MAX(Login_date), GETDATE()) >= 30)
+           ),
+           next_logins AS (
+             SELECT lb.Customer_id,
+                    lb.Login_date,
+                    LEAD(lb.Login_date) OVER (PARTITION BY lb.Customer_id ORDER BY lb.Login_date) AS next_login
+             FROM Login_base lb
+             JOIN eligible_customers ec ON lb.Customer_id = ec.Customer_id
+           ),
+           
+     
+           churn_gaps AS (
+             SELECT Customer_id,
+                    Login_date,
+                    next_login,
+                    CASE
+                      WHEN DATEDIFF(DAY, Login_date, next_login) >= 30 THEN 1
+                      WHEN next_login IS NULL AND DATEDIFF(DAY, Login_date, GETDATE()) >= 30 THEN 1
+                      ELSE 0
+                    END AS churn_flag
+             FROM next_logins
+           ),
+           
+           churn_rate AS (
+             SELECT
+               c.Customer_id,
+               SUM(p.Amount) AS total_spend,
+               cu.Gender,
+               cu.Age,
+               cu.Region,
+               ROUND(SUM(c.churn_flag) * 100.0 / COUNT(*), 2) AS churn_rate
+             FROM churn_gaps c
+             JOIN Customers cu ON cu.Customer_id = c.Customer_id
+             JOIN Purchases p ON c.Customer_id = p.Customer_id
+             GROUP BY c.Customer_id, cu.Gender, cu.Age, cu.Region
+           )
+           
+           -- 6. Final output with segmentation
+           SELECT
+             NTILE(4) OVER (ORDER BY total_spend DESC) AS LTV_Band,
+             Gender,
+             Age,
+             Region,
+             COUNT(*) AS Total_Customers,
+             ROUND(AVG(churn_rate), 2) AS Avg_Churn_Rate
+           FROM churn_rate
+           GROUP BY Gender, Age, Region, NTILE(4) OVER (ORDER BY total_spend DESC)
+           ORDER BY Avg_Churn_Rate DESC;
+
+
+Question 5 - End To End Pipeline - "Send the churned customers report (csv) via email"</br>
+Solution - Used Azure To accomplish this task </br>
+           - when i first entered on Azure platform , I created a data factory and a resource group with name "ChurnedUsers"</br>
+           - Now I created a SQL server (as I decided to use Azure SQl Database)</br>
+           - Azure SQL database - Cloud database to store my tables and use azure query editor to run my query.</br>
+           - I used Azure data factory to orchaestrate , there i linked my azure sql server and database and a blob storage</br>
+           - I created a storage account with name "customersdataforazure" and inside it i created a blob storage with name "CustomerBlob" on Azure platform</br>
+           - In ADF , under Author , I created 2 Pipelines - LoadCSVtoSQL ( to load the data into azure SQL tables ) , ExportChurnedViewToBlob ( the churned view runs and export the                       churned view to blob )  </br>
+           - I created a Logic App with name SendCSVEmail with 3 activities - **Recurrence** - because i want a repeated activity ( send email every day at 9am)</br>
+                                                                              **Get Blob Content** - to retrieve the churned report which is in the form of delimited text as CSV</br>
+                                                                              **Send Email** - configure my smtp details here ( i used gmail through App password as gmail use 2 step                                                                                         verification)</br>
+                                                                              
+**Snapshot Of Resources**
+**Snapshot Of Logic App**
+**Snapshot Of Email Sent**
+                                                                             
             
 
           
