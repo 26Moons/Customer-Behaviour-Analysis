@@ -1,6 +1,20 @@
 # Customer-Behaviour-Analysis
-Case Study :
+Case Study : As a data analyst/data engineer working for a BPO company ,</br>
+- I was responsible to figure out the login behaviour of every customer to know customer retention , to segment customer data which will help the company to know what are the</br>
+  possible bands which are concerning and feared churning. </br>
+- I was responsible for building an automated, scalable Customer Behavior & Churn Analysis pipeline using SQL and Azure which will help marketing teams stay updated.</br>
 
+DataSet Overview :</br>
+Tables Used:</br>
+Logins: Contains user login history (Customer_ID, Login_Date)</br>
+Customers: Contains demographic details (Age, Gender, Region)</br>
+Purchase : Contains amount spend by each customer.</br>
+
+🎯 Goals</br>
+Cohort Analysis: Group users by their first login month and track retention monthly.</br>
+Churn Detection: Identify users inactive for 30+ days.</br>
+Export Churned Users: Create a pipeline to export churned customer IDs as CSV.</br>
+Automation: Simulate a production-grade data pipeline with scheduling, monitoring, and email alerts.</br>
 
 Question 1 : "How many customers have logged in more than once (returning customers) compared to those who logged in only once (one-time customers)?"</br>
 Solution - Approach : (Go to Logins Table - find no of logins for each customer - count the no of logins if more than 1 then returning else one time)</br>
@@ -174,9 +188,10 @@ Solution - Used Azure To accomplish this task </br>
                                                                               **Get Blob Content** - to retrieve the churned report which is in the form of delimited text as CSV</br>
                                                                               **Send Email** - configure my smtp details here ( i used gmail through App password as gmail use 2 step                                                                                         verification)</br>
                                                                               
-**Snapshot Of Resources**
-**Snapshot Of Logic App**
-**Snapshot Of Email Sent**
+**Snapshot Of Resources**</br>
+
+**Snapshot Of Logic App**</br>
+**Snapshot Of Email Sent**</br>
                                                                              
             
 
